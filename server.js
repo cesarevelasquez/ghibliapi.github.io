@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { json, urlencoded } from 'body-parser';
 import passport from 'passport';
-import db from './db';
+import db from './db.js';
 import router from './network/routes';
 import './utils/strategies';
 
