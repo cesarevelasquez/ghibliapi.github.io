@@ -6,6 +6,7 @@ import {
 import verifyEnvironment from '../../middleware/environment';
 
 const router = express.Router();
+//Comentario de prueba
 
 router.post('/', verifyEnvironment, async (req, res) => {
   try {
