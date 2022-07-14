@@ -1,13 +1,16 @@
-import { sign } from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
 import { compare, hash } from 'bcrypt';
 import {
   getUser, addUser as _addUser, updateUser as _updateUser, getUserById,
 } from './store';
+import { user } from './network';
+const nodemailer = require("nodemailer");
 
 require('dotenv').config();
 
 async function addUser(newUser) {
   try {
+
     if (!newUser.userName || !newUser.password || !newUser.email) {
       throw ('No se ingresaron los datos correctos');
     }
@@ -23,6 +26,7 @@ async function addUser(newUser) {
     const token = sign(
       {
         _id: user._id,
+        role: user.role
       },
       process.env.JWT_SECRET,
       { expiresIn: '2d' },
@@ -32,6 +36,7 @@ async function addUser(newUser) {
       _id: user._id,
       userName: user.userName,
       email: user.email,
+      role: user.role,
       profilePic: user.profilePic,
       watchedMovies: user.watchedMovies.length,
       token,
@@ -63,6 +68,7 @@ async function findUser(userFind) {
     const token = sign(
       {
         _id: user._id,
+        role: user.role
       },
       process.env.JWT_SECRET,
       { expiresIn: '2d' },
@@ -72,6 +78,44 @@ async function findUser(userFind) {
       _id: user._id,
       userName: user.userName,
       email: user.email,
+      role: user.role,
+      profilePic: user.profilePic,
+      watchedMovies: user.watchedMovies.length,
+      token,
+    };
+  } catch (error) {
+    console.log(error);
+    throw ('Datos incorrectos');
+  }
+}
+
+async function findByEmail(userFind) {
+  try {
+    if (!userFind.email) {
+      throw ('No se ingresaron los datos correctos');
+    }
+
+    const user = await getUser(userFind);
+
+    if (!user) {
+      throw ('Este usuario no existe');
+    }
+
+    delete user._doc.password;
+    const token = sign(
+      {
+        _id: user._id,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '2d' },
+    );
+
+    return {
+      _id: user._id,
+      userName: user.userName,
+      email: user.email,
+      role: user.role,
       profilePic: user.profilePic,
       watchedMovies: user.watchedMovies.length,
       token,
@@ -119,6 +163,8 @@ async function updateUser(userID, userData, profilePic) {
       _id: user._id,
       userName: user.userName,
       email: user.email,
+      role: user.role,
+      recoveryToken: user.token,
       profilePic: user.profilePic,
       watchedMovies: user.watchedMovies.length,
     };
@@ -136,6 +182,7 @@ async function findOrCreate(userFind) {
         const newUser = {
           userName: userFind.name,
           email: userFind.email,
+          role: user.role,
           profilePic: userFind.picture.data.url,
         };
         user = await _addUser(newUser);
@@ -152,6 +199,7 @@ async function findOrCreate(userFind) {
     const token = sign(
       {
         _id: user._id,
+        role: user.role,
       },
       process.env.JWT_SECRET,
       { expiresIn: '2d' },
@@ -160,6 +208,7 @@ async function findOrCreate(userFind) {
       _id: user._id,
       userName: user.userName,
       email: user.email,
+      role: user.role,
       profilePic: user.profilePic,
       watchedMovies: user.watchedMovies.length,
       token,
@@ -170,9 +219,82 @@ async function findOrCreate(userFind) {
   }
 }
 
+async function sendMail(infoMail) {  
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    secure: true, // true for 465, false for other ports
+    port: 465,
+    auth: {
+        user: 'cesarvelasquezdev@gmail.com',
+        pass: 'qkocnxujiskyuloc'
+    }
+  });
+  await transporter.sendMail(infoMail);
+  return { message: 'mail sent' };
+}
+
+async function changePassword(token, newPassword) {
+  try {
+    const payload = verify(token, process.env.JWT_SECRET);
+    const user = await getUserById(payload._id);
+
+    if (user.recoveryToken !== token) {
+      console.log(error);
+      throw (error);
+    }
+    
+    const data = {
+      password: await hash(newPassword, 10),    // password: userData.newPassword ? await hash(userData.newPassword, 10) : userFind.password,
+      recoveryToken: null
+    };
+    
+    await _updateUser(user.id, data);
+    return { message: 'password changed' };
+
+  } catch (error) {
+    console.log(error);
+    throw (error);
+  }
+
+}
+
+async function sendRecovery(foundUser) {
+  const data = foundUser.email;
+  const token = sign(
+    {
+      _id: foundUser._id,
+      role: foundUser.role,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: '15min' }
+  );
+  const link = `https://fathomless-dusk-61919.herokuapp.com/recovery?token=${token}`;
+
+  const userID = foundUser._id;
+  const newData = {
+    ...data,
+    recoveryToken: token
+  }
+  const user = await _updateUser(userID, newData);
+  delete user._doc.password;
+
+  const mail = {
+    from: 'cesarvelasquezdev@gmail.com', // sender address
+    to: foundUser.email, // list of receivers
+    subject: "Recuperación de Contraseña", // Subject line
+    html: `<b>Ingresa a este link => ${link}</b>`, // html body
+  }
+  const rta = await sendMail(mail);
+  return rta;
+}
+
 export {
   addUser,
   findUser,
   updateUser,
   findOrCreate,
+  sendMail,
+  findByEmail,
+  sendRecovery,
+  changePassword
 };
