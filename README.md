@@ -3,7 +3,7 @@
 Develop a web application that allows you to view the entire catalog of movies produced by the Ghibli studio, as well as record a personal rating and keep track of which ones have already been seen and which ones have not
 ## Documentation
 
-[Documentation](https://www.notion.so/Studio-Ghibli-Tracker-Docs-542b749e94324cd280d3ecfdb9d3ca84)
+[Documentation](https://documenter.getpostman.com/view/16625822/UzQyq3DS)
 
 
 ## Environment Variables
