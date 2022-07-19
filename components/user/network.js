@@ -4,9 +4,9 @@ import passport from 'passport';
 import checkRole from '../../middleware/checkRole';
 import { success, error as _error } from '../../network/response';
 import {
-  findOrCreate, addUser, findUser, findByEmail, updateUser, sendMail, sendRecovery, changePassword
+  findOrCreate, addUser, findUser, findByEmail, updateUser, sendMail, sendRecovery, changePassword,
 } from './controller';
-const nodemailer = require("nodemailer");
+const nodemailer = require('nodemailer');
 
 const auth = express.Router();
 const user = express.Router();
@@ -70,11 +70,11 @@ auth.post('/recovery',
       const rta = await sendRecovery(data);
 
       res.json(rta);
-      //success(req, res, data, 200);
+      // success(req, res, data, 200);
     } catch (error) {
       _error(req, res, `${error}`, 500);
     }
-  }
+  },
 );
 
 auth.post('/changePassword',
@@ -84,11 +84,11 @@ auth.post('/changePassword',
       const rta = await changePassword(token, newPassword);
 
       res.json(rta);
-      //success(req, res, data, 200);
+      // success(req, res, data, 200);
     } catch (error) {
       _error(req, res, `${error}`, 500);
     }
-  }
+  },
 );
 
 user.patch('/update', upload.single('profilePic'), async (req, res) => {

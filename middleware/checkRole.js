@@ -4,13 +4,13 @@ import { error as _error } from '../network/response';
 function checkRole(req, res, next) {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
-  
+
   if (!token && req.body.role === 'admin') {
     return _error(req, res, 'No se pudo autenticar', 400, 'Token no enviado');
   }
-  
+
   let userFind = '';
-  
+
   if (token && req.body.role === 'admin') {
     try {
       userFind = verify(token, process.env.JWT_SECRET);

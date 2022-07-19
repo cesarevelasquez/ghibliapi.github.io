@@ -31,3 +31,11 @@ To run this project, you will need to add the following environment variables to
 `TWITTER_CONSUMER_KEY` 
 
 `TWITTER_CONSUMER_SECRET`
+
+`EMAIL_USER`
+
+`EMAIL_PASSWORD`
+
+`SMTP_HOST`
+
+`SMTP_PORT`

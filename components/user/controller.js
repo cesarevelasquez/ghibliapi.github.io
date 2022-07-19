@@ -3,14 +3,13 @@ import { compare, hash } from 'bcrypt';
 import {
   getUser, addUser as _addUser, updateUser as _updateUser, getUserById,
 } from './store';
-import { user } from './network';
-const nodemailer = require("nodemailer");
+
+const nodemailer = require('nodemailer');
 
 require('dotenv').config();
 
 async function addUser(newUser) {
   try {
-
     if (!newUser.userName || !newUser.password || !newUser.email) {
       throw ('No se ingresaron los datos correctos');
     }
@@ -68,7 +67,7 @@ async function findUser(userFind) {
     const token = sign(
       {
         _id: user._id,
-        role: user.role
+        role: user.role,
       },
       process.env.JWT_SECRET,
       { expiresIn: '2d' },
@@ -219,15 +218,15 @@ async function findOrCreate(userFind) {
   }
 }
 
-async function sendMail(infoMail) {  
+async function sendMail(infoMail) {
   const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    secure: true, // true for 465, false for other ports
-    port: 465,
+    host: process.env.SMTP_HOST,
+    secure: true,
+    port: process.env.SMTP_PORT,
     auth: {
-        user: 'cesarvelasquezdev@gmail.com',
-        pass: 'qkocnxujiskyuloc'
-    }
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD,
+    },
   });
   await transporter.sendMail(infoMail);
   return { message: 'mail sent' };
@@ -242,20 +241,17 @@ async function changePassword(token, newPassword) {
       console.log(error);
       throw (error);
     }
-    
+
     const data = {
-      password: await hash(newPassword, 10),    // password: userData.newPassword ? await hash(userData.newPassword, 10) : userFind.password,
-      recoveryToken: null
+      password: await hash(newPassword, 10),
+      recoveryToken: null,
     };
-    
     await _updateUser(user.id, data);
     return { message: 'password changed' };
-
   } catch (error) {
     console.log(error);
     throw (error);
   }
-
 }
 
 async function sendRecovery(foundUser) {
@@ -266,24 +262,24 @@ async function sendRecovery(foundUser) {
       role: foundUser.role,
     },
     process.env.JWT_SECRET,
-    { expiresIn: '15min' }
+    { expiresIn: '15min' },
   );
   const link = `https://fathomless-dusk-61919.herokuapp.com/recovery?token=${token}`;
 
   const userID = foundUser._id;
   const newData = {
     ...data,
-    recoveryToken: token
-  }
+    recoveryToken: token,
+  };
   const user = await _updateUser(userID, newData);
   delete user._doc.password;
 
   const mail = {
-    from: 'cesarvelasquezdev@gmail.com', // sender address
-    to: foundUser.email, // list of receivers
-    subject: "Recuperación de Contraseña", // Subject line
-    html: `<b>Ingresa a este link => ${link}</b>`, // html body
-  }
+    from: process.env.EMAIL_USER,
+    to: foundUser.email,
+    subject: 'Password recovery',
+    html: `<b>Ingresa a este link => ${link}</b>`,
+  };
   const rta = await sendMail(mail);
   return rta;
 }
@@ -296,5 +292,5 @@ export {
   sendMail,
   findByEmail,
   sendRecovery,
-  changePassword
+  changePassword,
 };

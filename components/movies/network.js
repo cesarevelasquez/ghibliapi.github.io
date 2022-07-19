@@ -5,10 +5,9 @@ import {
 } from './controller';
 /* import verifyEnvironment from '../../middleware/environment'; */
 import checkRole from '../../middleware/checkRole';
-import { authenticate } from 'passport';
 
 const router = express.Router();
-//Comentario de prueba
+// Comentario de prueba
 
 router.post('/', checkRole, async (req, res) => {
   try {
