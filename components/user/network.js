@@ -4,9 +4,8 @@ import passport from 'passport';
 import checkRole from '../../middleware/checkRole';
 import { success, error as _error } from '../../network/response';
 import {
-  findOrCreate, addUser, findUser, findByEmail, updateUser, sendMail, sendRecovery, changePassword,
+  findOrCreate, addUser, findUser, findByEmail, updateUser, sendRecovery, changePassword,
 } from './controller';
-const nodemailer = require('nodemailer');
 
 const auth = express.Router();
 const user = express.Router();
@@ -63,7 +62,8 @@ auth.post('/login', async (req, res) => {
   }
 });
 
-auth.post('/recovery',
+auth.post(
+  '/recovery',
   async (req, res) => {
     try {
       const data = await findByEmail(req.body);
@@ -77,7 +77,8 @@ auth.post('/recovery',
   },
 );
 
-auth.post('/changePassword',
+auth.post(
+  '/changePassword',
   async (req, res) => {
     try {
       const { token, newPassword } = req.body;
