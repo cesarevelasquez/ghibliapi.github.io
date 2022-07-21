@@ -1,9 +1,10 @@
 import express from 'express';
 import multer from 'multer';
 import passport from 'passport';
+import checkRole from '../../middleware/checkRole';
 import { success, error as _error } from '../../network/response';
 import {
-  findOrCreate, addUser, findUser, updateUser,
+  findOrCreate, addUser, findUser, findByEmail, updateUser, sendRecovery, changePassword,
 } from './controller';
 
 const auth = express.Router();
@@ -43,7 +44,7 @@ auth.get(
   },
 );
 
-auth.post('/signup', async (req, res) => {
+auth.post('/signup', checkRole, async (req, res) => {
   try {
     const data = await addUser(req.body);
     success(req, res, data, 201);
@@ -60,6 +61,36 @@ auth.post('/login', async (req, res) => {
     _error(req, res, `${error}`, 500);
   }
 });
+
+auth.post(
+  '/recovery',
+  async (req, res) => {
+    try {
+      const data = await findByEmail(req.body);
+      const rta = await sendRecovery(data);
+
+      res.json(rta);
+      // success(req, res, data, 200);
+    } catch (error) {
+      _error(req, res, `${error}`, 500);
+    }
+  },
+);
+
+auth.post(
+  '/changePassword',
+  async (req, res) => {
+    try {
+      const { token, newPassword } = req.body;
+      const rta = await changePassword(token, newPassword);
+
+      res.json(rta);
+      // success(req, res, data, 200);
+    } catch (error) {
+      _error(req, res, `${error}`, 500);
+    }
+  },
+);
 
 user.patch('/update', upload.single('profilePic'), async (req, res) => {
   try {

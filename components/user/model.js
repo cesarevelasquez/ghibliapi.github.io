@@ -13,7 +13,13 @@ const userSchema = new Schema({
     required: true,
     unique: true,
   },
+  role: {
+    type: String,
+  },
   password: {
+    type: String,
+  },
+  recoveryToken: {
     type: String,
   },
   profilePic: String,
