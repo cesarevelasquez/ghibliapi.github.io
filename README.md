@@ -6,38 +6,3 @@ Web API that allows you to view the entire catalog of movies produced by the Ghi
 To know how to use the API visit: https://documenter.getpostman.com/view/16625822/UzQyq3DS
 
 [Documentation](https://documenter.getpostman.com/view/16625822/UzQyq3DS)
-
-
-## Environment Variables
-
-To run this project, you will need to add the following environment variables to your .env file
-
-`MONGOATLAS_USER`
-
-`MONGOATLAS_PASSWORD`
-
-`MONGOATLAS_APPNAME`
-
-`NODE_ENV`
-
-`HOST` 
-
-`PORT` 
-
-`JWT_SECRET` 
-
-`FACEBOOK_APP_ID`
-
-`FACEBOOK_APP_SECRET` 
-
-`TWITTER_CONSUMER_KEY` 
-
-`TWITTER_CONSUMER_SECRET`
-
-`EMAIL_USER`
-
-`EMAIL_PASSWORD`
-
-`SMTP_HOST`
-
-`SMTP_PORT`
